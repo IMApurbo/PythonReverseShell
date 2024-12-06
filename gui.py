@@ -2,6 +2,7 @@ import customtkinter as ctk
 import socket
 import subprocess
 import os
+import threading
 import time
 import tkinter as tk
 from tkinter import filedialog
@@ -126,12 +127,10 @@ def start_listener():
         return
 
     print(f"Listening on port {port}...")
-
-    # Start the socket listener
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server_socket.bind(('0.0.0.0', int(port)))  # Listen on all network interfaces
-    server_socket.listen(5)  # Allow up to 5 pending connections
-
+    server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    server_socket.bind(('0.0.0.0', int(port)))
+    server_socket.listen(5)
     print("Server is waiting for a connection...")
 
     while True:
@@ -139,13 +138,16 @@ def start_listener():
             global client_socket
             client_socket, client_address = server_socket.accept()
             print(f"Connection established with {client_address}")
-
-            # Handle client communication in a separate thread or loop
             handle_client(client_socket)
-
-        except Exception as e:
-            print(f"Error: {str(e)}")
+        except KeyboardInterrupt:
+            stop_listener()
             break
+        except Exception as e:
+            print(f"Error: {e}")
+            break
+
+def start_listener_thread():
+    threading.Thread(target=start_listener, daemon=True).start()
 
 # Function to handle communication with a client
 def handle_client(client_socket):
@@ -236,7 +238,7 @@ listen_port_label.grid(row=0, column=0, padx=10, pady=10)
 listen_port_entry = ctk.CTkEntry(listen_tab)
 listen_port_entry.grid(row=0, column=1, padx=10, pady=10)
 
-listen_button = ctk.CTkButton(listen_tab, text="Start Listening", command=start_listener)
+listen_button = ctk.CTkButton(listen_tab, text="Start Listening", command=start_listener_thread)
 listen_button.grid(row=1, column=0, padx=10, pady=10)
 
 stop_button = ctk.CTkButton(listen_tab, text="Stop Listening", command=stop_listener)

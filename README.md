@@ -1,3 +1,12 @@
+### ***Create exe via Pyinstaller***
+   ```cmd
+   pyinstaller --noconfirm --onefile --windowed --icon "<Your_App_Icon_Location.ico_format>"  "<your_py_file_location>"
+   ```
+   ###OR
+   ```cmd
+   python -m PyInstaller --noconfirm --onefile --windowed --icon "<Your_App_Icon_Location.ico_format>"  "<your_py_file_location>"
+   ```
+
 ### **Running the Script on Startup (Windows)**
 
 To ensure that the reverse shell starts automatically when your Windows machine starts, you can place the script in the **Windows Startup folder** or use Task Scheduler. 

